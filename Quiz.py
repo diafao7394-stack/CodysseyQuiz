@@ -1,22 +1,67 @@
-class Quiz() :
-    def __init__(self, question, choices, answer) :
+import json
+from pathlib import Path
+
+
+class Quiz:
+    def __init__(self, question, choices, answer):
         self.question = question
         self.choices = choices
         self.answer = answer
-        
-    def show_question(self) :
+
+    def show_question(self):
         print(self.question)
-        for num, choice in enumerate(self.choices, start=1) :
-          print(num, choice)
-        
-    def is_correct(self, selected) :
+        for num, choice in enumerate(self.choices, start=1):
+            print(num, choice)
+
+    def is_correct(self, selected):
         return selected == self.answer
 
-class QuizGame :
-    def __init__(self, quizzes) :
-        self.quizzes = quizzes
 
-    def show_menu(self) :
+class QuizGame:
+    def __init__(self, quizzes):
+        self.quizzes = list(quizzes)
+        self.best_score = None
+        self.state_path = Path(__file__).resolve().with_name("state.json")
+
+    def load_state(self):
+        try:
+            with self.state_path.open("r", encoding="utf-8") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            return
+        except json.JSONDecodeError:
+            print("저장 파일의 형식이 올바르지 않아 기본 퀴즈를 사용합니다.")
+            return
+
+        loaded_quizzes = []
+        for item in data["quizzes"]:
+            quiz = Quiz(item["question"], item["choices"], item["answer"])
+            loaded_quizzes.append(quiz)
+
+        loaded_best_score = data["best_score"]
+        self.quizzes = loaded_quizzes
+        self.best_score = loaded_best_score
+
+    def save_state(self) :
+        saved_quizzes = []
+        for quiz in self.quizzes :
+            saved_quizzes.append({
+                "question": quiz.question,
+                "choices" : quiz.choices,
+                "answer" : quiz.answer})
+            data = {
+                "quizzes": saved_quizzes,
+                "best_score" : self.best_score,
+                }
+            temp_path = self.state_path.with_suffix(".json.tmp")
+            try :
+                with temp_path.open("w", encoding="utf-8") as file :
+                    json.dump(data, file, ensure_ascii=False, indent=2)
+                temp_path.replace(self.state_path)
+            except OSError as error :
+                print(f"저장 파일을 쓰지 못했습니다. {error}")
+
+    def show_menu(self):
         print("""퀴즈를 진행하겠습니다.
 1. 퀴즈 풀기
 2. 퀴즈 추가
@@ -24,31 +69,31 @@ class QuizGame :
 4. 최고 점수
 5. 종료""")
 
-    def run(self) :
+    def run(self):
         self.show_menu()
-        while True :
-            try :
-                a = int(input("번호를 선택해주세요 >> ").strip())
-                
-                if (a > 5) or (a < 1 ) :
-                    print("1~5 사이의 숫자를 입력해주세요")
-                    continue
-                elif a == 1 :
-                    print("퀴즈를 출제하겠습니다")
-                elif a == 2 :
-                    print("퀴즈를 추가하겠습니다")
-                elif a == 3 :
-                    print("퀴즈 목록을 출력하겠습니다.")
-                elif a == 4 :
-                    print("최고 점수를 알려드리겠습니다.")
-                elif a == 5 :
-                    print("퀴즈 프로그램을 종료합니다.")
-                    break
-            except ValueError :
+
+        while True:
+            try:
+                choice = int(input("번호를 선택해주세요 >> ").strip())
+            except ValueError:
                 print("숫자를 다시 입력해주세요.")
                 continue
-            
-        
+
+            if choice < 1 or choice > 5:
+                print("1~5 사이의 숫자를 입력해주세요.")
+                continue
+
+            if choice == 1:
+                print("퀴즈를 출제하겠습니다.")
+            elif choice == 2:
+                print("퀴즈를 추가하겠습니다.")
+            elif choice == 3:
+                print("퀴즈 목록을 출력하겠습니다.")
+            elif choice == 4:
+                print("최고 점수를 알려드리겠습니다.")
+            elif choice == 5:
+                print("퀴즈 프로그램을 종료합니다.")
+                break
 
 
 default_quizzes = [
@@ -81,4 +126,5 @@ default_quizzes = [
 
 
 game = QuizGame(default_quizzes)
+game.load_state()
 game.run()
