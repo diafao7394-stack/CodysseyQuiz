@@ -1,0 +1,14 @@
+퀴즈 클래스
+	init - question, choices, answer
+	show_question - print
+	is_correct
+퀴즈게임 클래스
+	init - quizzes
+	load_state
+	save_state
+	show_menu
+	run
+	play_quiz
+
+퀴즈는? quizzes에 저장됨.
+
