@@ -9,6 +9,7 @@
 	show_menu
 	run
 	play_quiz
+	add_quiz
 
 퀴즈는? quizzes에 저장됨.
 

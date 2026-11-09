@@ -94,6 +94,7 @@ class QuizGame:
                     print("퀴즈가 정상적으로 출력되지 않았습니다.")
             elif choice == 2:
                 print("퀴즈를 추가하겠습니다.")
+                self.add_quiz() 
             elif choice == 3:
                 print("퀴즈 목록을 출력하겠습니다.")
             elif choice == 4:
@@ -127,7 +128,37 @@ class QuizGame:
                     continue
                     
         return score
-            
+    
+    def add_quiz(self) :
+        plus_quiz = [0, [0, 0, 0, 0], 0]
+        while True :    
+            plus_quiz[0] = (input("문제를 입력해주세요! ==> "))
+            if plus_quiz[0].strip() == '' :
+                print("문제를 제대로 작성해주시길 바랍니다.")
+                continue
+            else : break
+        i = 0
+        while i <= 3 :
+            plus_quiz[1][i] = (input(f"선택지를 만들어주세요! {i+1}번 ==> "))
+            if plus_quiz[1][i].strip() != '' :
+                i += 1
+                continue
+            else : print("선택지를 제대로 작성해주시길 바랍니다.")
+        while True :
+            try :
+                answer = int(input("정답을 알려주세요! ==> ").strip())
+
+                if answer < 1 or answer > 4 :
+                    print("유효한 범위가 아닙니다!! 다시 입력해주세요!")
+                else : 
+                    plus_quiz[2] = answer
+                    break
+            except ValueError : 
+                print("숫자를 입력해주세요!!")
+                continue
+        quiz = Quiz(plus_quiz[0], plus_quiz[1], plus_quiz[2])
+        self.quizzes.append(quiz)
+        self.save_state()
 
 
 default_quizzes = [
