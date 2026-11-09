@@ -80,6 +80,5 @@ default_quizzes = [
 ]
 
 
-    
-    
-
+game = QuizGame(default_quizzes)
+game.run()
