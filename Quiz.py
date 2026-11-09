@@ -71,7 +71,7 @@ class QuizGame:
 3. 퀴즈 목록
 4. 최고 점수
 5. 종료""")
-
+    
     def run(self):
         self.show_menu()
 
@@ -87,7 +87,11 @@ class QuizGame:
                 continue
 
             if choice == 1:
-                print("퀴즈를 출제하겠습니다.")
+                score = self.play_quiz()
+                if score is not None :
+                    print(f"최종 점수: {score}/{len(self.quizzes)}")
+                elif score is None :
+                    print("퀴즈가 정상적으로 출력되지 않았습니다.")
             elif choice == 2:
                 print("퀴즈를 추가하겠습니다.")
             elif choice == 3:
@@ -97,6 +101,33 @@ class QuizGame:
             elif choice == 5:
                 print("퀴즈 프로그램을 종료합니다.")
                 break
+
+    def play_quiz(self) :
+        score = 0
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+        for i in self.quizzes :
+            while True :
+                i.show_question()
+                try:
+                    select = int(input("정답을 입력하세요 ==> ").strip())
+                    if select < 1 or select > 4 :
+                        print("잘못된 값을 입력하셨습니다. 다시 입력해주세요.")
+                        continue
+                    score += i.is_correct(select)
+                    if i.is_correct(select) :
+                        print("정답입니다!")
+                        break
+                    elif not i.is_correct(select) :
+                        print("오답입니다!")
+                        break
+                except ValueError :
+                    print("숫자를!!!! 입력하세요!!!!")
+                    continue
+                    
+        return score
+            
 
 
 default_quizzes = [
