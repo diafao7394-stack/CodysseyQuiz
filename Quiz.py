@@ -42,24 +42,27 @@ class QuizGame:
         self.quizzes = loaded_quizzes
         self.best_score = loaded_best_score
 
-    def save_state(self) :
+    def save_state(self):
         saved_quizzes = []
-        for quiz in self.quizzes :
+        for quiz in self.quizzes:
             saved_quizzes.append({
                 "question": quiz.question,
-                "choices" : quiz.choices,
-                "answer" : quiz.answer})
-            data = {
-                "quizzes": saved_quizzes,
-                "best_score" : self.best_score,
-                }
-            temp_path = self.state_path.with_suffix(".json.tmp")
-            try :
-                with temp_path.open("w", encoding="utf-8") as file :
-                    json.dump(data, file, ensure_ascii=False, indent=2)
-                temp_path.replace(self.state_path)
-            except OSError as error :
-                print(f"저장 파일을 쓰지 못했습니다. {error}")
+                "choices": quiz.choices,
+                "answer": quiz.answer,
+            })
+
+        data = {
+            "quizzes": saved_quizzes,
+            "best_score": self.best_score,
+        }
+
+        temp_path = self.state_path.with_suffix(".json.tmp")
+        try:
+            with temp_path.open("w", encoding="utf-8") as file:
+                json.dump(data, file, ensure_ascii=False, indent=2)
+            temp_path.replace(self.state_path)
+        except OSError as error:
+            print(f"저장 파일을 쓰지 못했습니다. {error}")
 
     def show_menu(self):
         print("""퀴즈를 진행하겠습니다.
