@@ -21,6 +21,7 @@ class QuizGame:
     def __init__(self, quizzes):
         self.quizzes = list(quizzes)
         self.best_score = None
+        self.state_needs_save = False
         self.state_path = Path(__file__).resolve().with_name("state.json")
 
     def load_state(self):
@@ -91,6 +92,7 @@ class QuizGame:
             with temp_path.open("w", encoding="utf-8") as file:
                 json.dump(data, file, ensure_ascii=False, indent=2)
             temp_path.replace(self.state_path)
+            self.state_needs_save = False
         except OSError as error:
             print(f"저장 파일을 쓰지 못했습니다. {error}")
 
@@ -104,39 +106,46 @@ class QuizGame:
     
     def run(self):
         self.show_menu()
+        try :
+            while True:
+                try:
+                    choice = int(input("번호를 선택해주세요 >> ").strip())
+                except ValueError:
+                    print("숫자를 다시 입력해주세요.")
+                    continue
 
-        while True:
-            try:
-                choice = int(input("번호를 선택해주세요 >> ").strip())
-            except ValueError:
-                print("숫자를 다시 입력해주세요.")
-                continue
+                if choice < 1 or choice > 5:
+                    print("1~5 사이의 숫자를 입력해주세요.")
+                    continue
 
-            if choice < 1 or choice > 5:
-                print("1~5 사이의 숫자를 입력해주세요.")
-                continue
-
-            if choice == 1:
-                score = self.play_quiz()
-                if score is not None :
-                    print(f"최종 점수: {score}/{len(self.quizzes)}")
-                elif score is None :
-                    print("퀴즈가 정상적으로 출력되지 않았습니다.")
+                if choice == 1:
+                    score = self.play_quiz()
+                    if score is not None :
+                        self.update_data_score(score)
+                        print(f"최종 점수: {score}/{len(self.quizzes)}")
+                    elif score is None :
+                        print("퀴즈가 정상적으로 출력되지 않았습니다.")
+                        
+                elif choice == 2:
+                    print("퀴즈를 추가하겠습니다.")
+                    self.add_quiz() 
                     
-            elif choice == 2:
-                print("퀴즈를 추가하겠습니다.")
-                self.add_quiz() 
-                
-            elif choice == 3:
-                print("퀴즈 목록을 출력하겠습니다.")
-                self.show_quiz_list()
-                
-            elif choice == 4:
-                print("최고 점수를 알려드리겠습니다.")
-                
-            elif choice == 5:
-                print("퀴즈 프로그램을 종료합니다.")
-                break
+                elif choice == 3:
+                    print("퀴즈 목록을 출력하겠습니다.")
+                    self.show_quiz_list()
+                    
+                elif choice == 4:
+                    print("최고 점수를 알려드리겠습니다.")
+                    self.show_best_score()
+                elif choice == 5:
+                    print("퀴즈 프로그램을 종료합니다.")
+                    break
+        except (KeyboardInterrupt, EOFError):
+            print("\n입력이 중단되었습니다.")
+            
+        if self.state_needs_save :
+            self.save_state()
+        print("쿠;즈 프로그램 종료")
 
     def play_quiz(self) :
         score = 0
@@ -193,6 +202,7 @@ class QuizGame:
                 continue
         quiz = Quiz(plus_quiz[0], plus_quiz[1], plus_quiz[2])
         self.quizzes.append(quiz)
+        self.state_needs_save = True
         self.save_state()
     
     def show_quiz_list(self):
@@ -202,7 +212,18 @@ class QuizGame:
 
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"{number}. {quiz.question}")
-
+            
+    def update_data_score(self, score) :
+        if self.best_score is None or score > self.best_score :
+            self.best_score = score
+            self.state_needs_save = True
+            self.save_state()
+            
+    def show_best_score(self) :
+        if self.best_score is None :
+            print("아직 점수를 획득하지 않았습니다.")
+        else :
+            print(f"사용자의 최고 점수는 {self.best_score}점 입니다!")
 
 default_quizzes = [
     Quiz(
