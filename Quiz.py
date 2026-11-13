@@ -29,18 +29,48 @@ class QuizGame:
                 data = json.load(file)
         except FileNotFoundError:
             return
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnicodeDecodeError):
             print("저장 파일의 형식이 올바르지 않아 기본 퀴즈를 사용합니다.")
             return
+        except OSError as error:
+            print(f"저장 파일을 읽지 못해 기본 퀴즈를 사용합니다. {error}")
+            return
 
+        if not isinstance(data, dict) or not isinstance(data.get("quizzes"), list):
+            print("저장된 퀴즈 목록의 형식이 올바르지 않아 기본 퀴즈를 사용합니다.")
+            return
+
+        saved_quizzes = data["quizzes"]
         loaded_quizzes = []
-        for item in data["quizzes"]:
-            quiz = Quiz(item["question"], item["choices"], item["answer"])
-            loaded_quizzes.append(quiz)
+        for number, item in enumerate(saved_quizzes, start=1):
+            if isinstance(item, dict):
+                question = item.get("question")
+                choices = item.get("choices")
+                answer = item.get("answer")
+                if (
+                    isinstance(question, str)
+                    and question.strip()
+                    and isinstance(choices, list)
+                    and len(choices) == 4
+                    and all(isinstance(choice, str) and choice.strip() for choice in choices)
+                    and type(answer) is int
+                    and 1 <= answer <= 4
+                ):
+                    loaded_quizzes.append(Quiz(question, choices, answer))
+                    continue
+            print(f"저장된 {number}번 퀴즈의 형식이 올바르지 않아 건너뜁니다.")
 
-        loaded_best_score = data["best_score"]
+        if saved_quizzes and not loaded_quizzes:
+            print("읽을 수 있는 문제가 없어 기본 퀴즈를 사용합니다.")
+            return
+
+        best_score = data.get("best_score")
+        if best_score is not None and (type(best_score) is not int or best_score < 0):
+            print("저장된 최고 점수의 형식이 올바르지 않아 점수를 초기화합니다.")
+            best_score = None
+
         self.quizzes = loaded_quizzes
-        self.best_score = loaded_best_score
+        self.best_score = best_score
 
     def save_state(self):
         saved_quizzes = []
@@ -92,13 +122,18 @@ class QuizGame:
                     print(f"최종 점수: {score}/{len(self.quizzes)}")
                 elif score is None :
                     print("퀴즈가 정상적으로 출력되지 않았습니다.")
+                    
             elif choice == 2:
                 print("퀴즈를 추가하겠습니다.")
                 self.add_quiz() 
+                
             elif choice == 3:
                 print("퀴즈 목록을 출력하겠습니다.")
+                self.show_quiz_list()
+                
             elif choice == 4:
                 print("최고 점수를 알려드리겠습니다.")
+                
             elif choice == 5:
                 print("퀴즈 프로그램을 종료합니다.")
                 break
@@ -159,6 +194,14 @@ class QuizGame:
         quiz = Quiz(plus_quiz[0], plus_quiz[1], plus_quiz[2])
         self.quizzes.append(quiz)
         self.save_state()
+    
+    def show_quiz_list(self):
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+
+        for number, quiz in enumerate(self.quizzes, start=1):
+            print(f"{number}. {quiz.question}")
 
 
 default_quizzes = [
@@ -188,7 +231,6 @@ default_quizzes = [
         2,
     ),
 ]
-
 
 game = QuizGame(default_quizzes)
 game.load_state()
