@@ -145,7 +145,7 @@ class QuizGame:
             
         if self.state_needs_save :
             self.save_state()
-        print("쿠;즈 프로그램 종료")
+        print("퀴즈 프로그램 종료")
 
     def play_quiz(self) :
         score = 0
