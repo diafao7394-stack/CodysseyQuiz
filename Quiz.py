@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 class Quiz:
@@ -23,6 +24,7 @@ class QuizGame:
         self.best_score = None
         self.state_needs_save = False
         self.state_path = Path(__file__).resolve().with_name("state.json")
+        self._last_saved_state = None
 
     def load_state(self):
         try:
@@ -72,29 +74,42 @@ class QuizGame:
 
         self.quizzes = loaded_quizzes
         self.best_score = best_score
+        self._last_saved_state = self._state_data()
 
-    def save_state(self):
-        saved_quizzes = []
-        for quiz in self.quizzes:
-            saved_quizzes.append({
-                "question": quiz.question,
-                "choices": quiz.choices,
-                "answer": quiz.answer,
-            })
-
-        data = {
-            "quizzes": saved_quizzes,
+    def _state_data(self):
+        return {
+            "quizzes": [
+                {
+                    "question": quiz.question,
+                    "choices": list(quiz.choices),
+                    "answer": quiz.answer,
+                }
+                for quiz in self.quizzes
+            ],
             "best_score": self.best_score,
         }
 
-        temp_path = self.state_path.with_suffix(".json.tmp")
-        try:
+    @staticmethod
+    def _write_state(path, data):
+        with TemporaryDirectory(dir=path.parent) as directory:
+            temp_path = Path(directory) / path.name
             with temp_path.open("w", encoding="utf-8") as file:
                 json.dump(data, file, ensure_ascii=False, indent=2)
-            temp_path.replace(self.state_path)
-            self.state_needs_save = False
+            temp_path.replace(path)
+
+    def save_state(self):
+        data = self._state_data()
+        try:
+            if self._last_saved_state is not None:
+                backup_path = self.state_path.with_name("state.backup.json")
+                self._write_state(backup_path, self._last_saved_state)
+            self._write_state(self.state_path, data)
         except OSError as error:
             print(f"저장 파일을 쓰지 못했습니다. {error}")
+            return
+
+        self._last_saved_state = data
+        self.state_needs_save = False
 
     def show_menu(self):
         print("""퀴즈를 진행하겠습니다.
