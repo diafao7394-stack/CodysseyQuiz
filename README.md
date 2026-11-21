@@ -1,32 +1,42 @@
-# 전체적인 파이썬 파일 구조
+# CodysseyQuiz
 
-Class Quiz :  
-	init - question, choices, answer
-	def show_question - print
-	def is_correct  
-Class QuizGame :
-	init - quizzes (Quiz)
-	def load_state (Load Json file)
-	def save_state (Save Json file)
-	def show_menu  
-	def run
-	def play_quiz
-	def add_quiz
-    def quiz_list
+CodysseyQuiz는 코디세이 실습에서 만든 Python 콘솔 역사 퀴즈입니다. 기본 역사 문제 5개가 포함된 4지선다형 퀴즈를 풀고, 직접 만든 문제를 추가할 수 있습니다.
 
-	## 실행 방법
+## 실행 방법
 
-Python 3가 필요합니다. 별도로 설치할 패키지는 없습니다.
+실행에는 Python 3 표준 라이브러리만 사용합니다. Git이 설치되어 있다면 터미널에서 아래 명령을 순서대로 실행하세요.
 
-1. `Quiz.py`가 있는 프로젝트 폴더에서 터미널을 엽니다.
-2. 아래 명령으로 게임을 실행합니다.
+```powershell
+git clone https://github.com/diafao7394-stack/CodysseyQuiz.git
+cd CodysseyQuiz
+python Quiz.py
+```
 
-   ```powershell
-   python Quiz.py
-   ```
+프로그램이 시작되면 메뉴 번호를 입력해 기능을 선택합니다. Windows에서 IDLE을 사용하는 경우 `Quiz.py`를 열고 `F5`를 눌러 실행할 수도 있습니다.
 
-3. 메뉴 번호를 입력해 기능을 선택합니다. `5`를 입력하면 게임이 종료됩니다.
+## 주요 기능
 
-IDLE에서는 `Quiz.py`를 열고 `F5`를 눌러 실행할 수 있습니다.
+| 메뉴 | 설명 |
+| --- | --- |
+| 1. 퀴즈 풀기 | 각 문제의 답을 1~4번 중에서 고릅니다. 답을 입력하면 정오답을 알려주고, 모든 문제를 풀면 전체 문제 수와 맞힌 문제 수를 표시합니다. |
+| 2. 퀴즈 추가 | 질문, 선택지 4개, 정답 번호를 입력해 새 문제를 추가합니다. |
+| 3. 퀴즈 목록 | 등록된 문제의 질문을 번호순으로 확인합니다. |
+| 4. 최고 점수 | 한 번의 퀴즈에서 가장 많이 맞힌 문제 수를 확인합니다. |
+| 5. 종료 | 프로그램을 종료합니다. |
 
-추가한 퀴즈와 최고 점수는 `Quiz.py`와 같은 폴더의 `state.json`에 저장됩니다. 저장 파일이 없는 첫 실행에는 기본 문제 5개가 나옵니다.
+## 데이터 저장 방식
+
+첫 실행에는 기본 역사 문제 5개로 시작합니다. 문제를 추가하거나 최고 점수를 처음 기록하거나 갱신하면, 전체 퀴즈 목록과 최고 점수를 `Quiz.py`와 같은 폴더의 `state.json`에 저장합니다. 다음 실행에서는 이 파일을 읽어 저장된 문제와 최고 점수를 불러옵니다.
+
+## 코드 및 저장소 구조
+
+- `Quiz`는 개별 문제의 질문, 선택지, 정답을 보관합니다. `show_question()`으로 문제를 출력하고 `is_correct()`로 정답을 판정합니다.
+- `QuizGame`은 메뉴와 퀴즈 진행, 채점, 데이터 저장 및 불러오기를 담당합니다. `show_quiz_list()`는 등록된 문제의 질문을 출력합니다.
+
+| 파일 또는 폴더 | 역할 |
+| --- | --- |
+| [Quiz.py](Quiz.py) | 퀴즈를 실행하는 Python 파일 |
+| [.gitignore](.gitignore) | `state.json`과 Python 캐시를 Git 추적 대상에서 제외하는 설정 |
+| [코드 구조.txt](코드%20구조.txt) | 클래스와 주요 메서드를 정리한 개발 메모 |
+| [Git-복제-실습.md](Git-복제-실습.md) | 저장소 초기화, 기능 브랜치 병합, 복제 및 변경 사항 반영 과정 |
+| [보관함/](보관함/) | 개발 단계별 코드와 콘솔 출력 기록 |
