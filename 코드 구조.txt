@@ -1,15 +1,29 @@
-퀴즈 클래스
-	init - question, choices, answer
-	show_question - print
-	is_correct
-퀴즈게임 클래스
-	init - quizzes
-	load_state
-	save_state
-	show_menu
-	run
-	play_quiz
-	add_quiz
+퀴즈 클래스 (Quiz)
+    __init__(question, choices, answer) - 질문, 선택지 목록, 정답 번호를 저장
+    show_question() - 질문과 1번부터 번호를 붙인 선택지를 출력
+    is_correct(selected) - 사용자가 선택한 번호와 정답 번호가 같은지 반환
 
-퀴즈는? quizzes에 저장됨.
+퀴즈게임 클래스 (QuizGame)
+    __init__(quizzes) - 퀴즈 목록을 복사하고 게임 상태를 초기화
+        quizzes - 현재 등록된 Quiz 객체 목록
+        best_score - 최고 점수. 아직 점수가 없으면 None
+        state_needs_save - 저장해야 할 변경이 남았는지 표시
+        state_path - Quiz.py와 같은 폴더에 있는 state.json 경로
+        _last_saved_state - 직전에 불러왔거나 저장한 상태. 다음 저장 시 백업에 사용
+    load_state() - state.json에서 유효한 문제와 최고 점수를 불러옴. 파일을 읽을 수 없으면 기본 퀴즈를 유지
+    _state_data() - 퀴즈 목록과 최고 점수를 JSON으로 저장할 수 있는 딕셔너리로 변환
+    _write_state(path, data) - 임시 파일에 JSON을 쓴 뒤 지정한 파일을 교체하는 정적 메서드
+    save_state() - 이전 상태가 있으면 state.backup.json에 백업한 뒤 현재 상태를 state.json에 저장
+    show_menu() - 퀴즈 풀기, 퀴즈 추가, 퀴즈 목록, 최고 점수, 종료 메뉴를 출력
+    run() - 메뉴 입력을 검증하고 기능을 실행. 종료 시 저장이 필요한 변경이 있으면 다시 저장을 시도
+    play_quiz() - 등록된 문제를 순서대로 출제하고, 맞힌 문제 수를 반환
+    add_quiz() - 질문, 선택지 4개, 정답 번호를 검증하고 새 문제를 목록에 추가한 뒤 저장
+    show_quiz_list() - 등록된 문제의 질문을 번호순으로 출력
+    update_data_score(score) - 최고 점수가 처음 기록되거나 갱신되면 저장
+    show_best_score() - 최고 점수 또는 아직 기록이 없다는 안내를 출력
 
+실행 흐름
+    default_quizzes - 기본 역사 문제 5개를 담은 Quiz 객체 목록
+    game = QuizGame(default_quizzes)
+    game.load_state()
+    game.run()
