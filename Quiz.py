@@ -134,12 +134,12 @@ class QuizGame:
                     continue
 
                 if choice == 1:
-                    score = self.play_quiz()
-                    if score is not None :
-                        self.update_data_score(score)
-                        print(f"최종 점수: {score}/{len(self.quizzes)}")
-                    elif score is None :
-                        print("퀴즈가 정상적으로 출력되지 않았습니다.")
+                    question_count = self.select_question_count()
+                    if question_count is None:
+                        continue
+                    score = self.play_quiz(question_count)
+                    self.update_data_score(score)
+                    print(f"최종 점수: {score}/{question_count}")
                         
                 elif choice == 2:
                     print("퀴즈를 추가하겠습니다.")
@@ -162,26 +162,42 @@ class QuizGame:
             self.save_state()
         print("퀴즈 프로그램 종료")
 
-    def play_quiz(self) :
+    def select_question_count(self):
+        total_questions = len(self.quizzes)
+        if total_questions == 0:
+            print("등록된 퀴즈가 없습니다.")
+            return None
+
+        while True:
+            try:
+                count = int(input(f"몇 문제를 풀까요? (1~{total_questions}) >> ").strip())
+            except ValueError:
+                print("문제 수를 정수로 입력해주세요.")
+                continue
+
+            if 1 <= count <= total_questions:
+                return count
+            print(f"1~{total_questions} 사이의 문제 수를 입력해주세요.")
+
+    def play_quiz(self, question_count=None):
         score = 0
         if not self.quizzes:
             print("등록된 퀴즈가 없습니다.")
             return
-        for i in self.quizzes :
+        for quiz in self.quizzes[:question_count]:
             while True :
-                i.show_question()
+                quiz.show_question()
                 try:
                     select = int(input("정답을 입력하세요 ==> ").strip())
                     if select < 1 or select > 4 :
                         print("잘못된 값을 입력하셨습니다. 다시 입력해주세요.")
                         continue
-                    score += i.is_correct(select)
-                    if i.is_correct(select) :
+                    if quiz.is_correct(select):
+                        score += 1
                         print("정답입니다!")
-                        break
-                    elif not i.is_correct(select) :
+                    else:
                         print("오답입니다!")
-                        break
+                    break
                 except ValueError :
                     print("숫자를!!!! 입력하세요!!!!")
                     continue
